@@ -1,61 +1,80 @@
 const express = require('express');
-const fs = require('fs');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const { execFile } = require('child_process');
 const path = require('path');
-const { exec } = require('child_process');
 
 const app = express();
 const PORT = 3000;
 
-// Serve all files inside 'public' folder
-app.use(express.static('public'));
+// Middleware
+app.use(cors());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
-// Middleware to parse JSON and URL-encoded data
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// Serve static files from public folder
+app.use(express.static(path.join(__dirname, 'public')));
 
-// Utility to get full path to data files
-function dataFile(fileName) {
-    return path.join(__dirname, fileName);
+// Helper to call C executables
+function runExe(fileName, args = [], res) {
+    const exePath = path.join(__dirname, fileName);
+    execFile(exePath, args, (error, stdout, stderr) => {
+        if (error) {
+            console.error(error);
+            res.status(500).send(stderr || 'Error running API');
+            return;
+        }
+        res.send(stdout);
+    });
 }
 
-// Routes for HTML pages
-app.get('/', (req, res) => res.sendFile(path.join(__dirname, 'public', 'index.html')));
-app.get('/auth', (req, res) => res.sendFile(path.join(__dirname, 'public', 'auth.html')));
-app.get('/community', (req, res) => res.sendFile(path.join(__dirname, 'public', 'community.html')));
-app.get('/dashboard_faculty', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard_faculty.html')));
-app.get('/dashboard_student', (req, res) => res.sendFile(path.join(__dirname, 'public', 'dashboard_student.html')));
-app.get('/doubt', (req, res) => res.sendFile(path.join(__dirname, 'public', 'doubt.html')));
-app.get('/faculty', (req, res) => res.sendFile(path.join(__dirname, 'public', 'faculty.html')));
-app.get('/hub', (req, res) => res.sendFile(path.join(__dirname, 'public', 'hub.html')));
-app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, 'public', 'notes.html')));
-app.get('/quiz', (req, res) => res.sendFile(path.join(__dirname, 'public', 'quiz.html')));
-app.get('/syllabus', (req, res) => res.sendFile(path.join(__dirname, 'public', 'syllabus.html')));
+// ===== API ROUTES =====
 
-// API routes to run .exe files (example for auth_api)
+// Auth API
 app.post('/api/auth', (req, res) => {
-    exec(path.join(__dirname, 'auth_api.exe'), (err, stdout, stderr) => {
-        if (err) return res.status(500).send(stderr);
-        res.send(stdout);
-    });
+    const { username, password } = req.body;
+    runExe('auth_api.exe', [username, password], res);
 });
 
-// You can duplicate above for other .exe files:
+// Community API
+app.post('/api/community', (req, res) => {
+    const { userId, message } = req.body;
+    runExe('community_api.exe', [userId, message], res);
+});
+
+// Doubt API
+app.post('/api/doubt', (req, res) => {
+    const { userId, doubtText } = req.body;
+    runExe('doubt_api.exe', [userId, doubtText], res);
+});
+
+// Notes API
+app.post('/api/notes', (req, res) => {
+    const { noteId, content } = req.body;
+    runExe('notes_api.exe', [noteId, content], res);
+});
+
+// Quiz API
+app.post('/api/quiz', (req, res) => {
+    const { quizId, answer } = req.body;
+    runExe('quiz_api.exe', [quizId, answer], res);
+});
+
+// Syllabus API
+app.post('/api/syllabus', (req, res) => {
+    const { syllabusId, content } = req.body;
+    runExe('syllabus_api.exe', [syllabusId, content], res);
+});
+
+// Faculty API
 app.post('/api/faculty', (req, res) => {
-    exec(path.join(__dirname, 'faculty_api.exe'), (err, stdout, stderr) => {
-        if (err) return res.status(500).send(stderr);
-        res.send(stdout);
-    });
+    const { facultyId, data } = req.body;
+    runExe('faculty_api.exe', [facultyId, data], res);
 });
 
-// Add more .exe API endpoints as needed...
-
-// Example API to read a text file
-app.get('/api/accounts', (req, res) => {
-    const filePath = dataFile('accounts.txt');
-    fs.readFile(filePath, 'utf-8', (err, data) => {
-        if (err) return res.status(500).send('Error reading file');
-        res.send(data);
-    });
+// Default route: serve index.html
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Start server
