@@ -1,23 +1,18 @@
 const express = require("express");
 const { spawn } = require("child_process");
-const path = require("path");          // 🔥 ADD THIS
+const path = require("path");
 const app = express();
 const PORT = 3000;
+const cors = require("cors");
 
+// ✅ Allow all origins (frontend can access backend)
+app.use(cors());
 app.use(express.json());
 
-app.use(express.static("public"));          // <-- add this
-app.get("/", (req, res) => {               // <-- add this
+// ✅ Serve frontend static files
+app.use(express.static("public"));
+app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "public", "index.html"));
-});
-
-// CORS for all routes
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,DELETE,OPTIONS"); // 🔥 ADD DELETE
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
-  if (req.method === "OPTIONS") return res.sendStatus(200);
-  next();
 });
 
 
@@ -983,4 +978,5 @@ app.post("/notes", (req, res) => {
     notes.push({ title, subject, content, faculty });
     res.json({ success: true, message: "Note added!" });
 });
+
 
