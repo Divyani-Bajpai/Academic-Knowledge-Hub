@@ -6,6 +6,11 @@ const PORT = 3000;
 
 app.use(express.json());
 
+app.use(express.static("public"));          // <-- add this
+app.get("/", (req, res) => {               // <-- add this
+  res.sendFile(path.join(__dirname, "public", "index.html"));
+});
+
 // CORS for all routes
 app.use((req, res, next) => {
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -978,3 +983,4 @@ app.post("/notes", (req, res) => {
     notes.push({ title, subject, content, faculty });
     res.json({ success: true, message: "Note added!" });
 });
+
