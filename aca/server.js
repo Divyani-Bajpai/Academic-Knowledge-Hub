@@ -961,20 +961,3 @@ app.get("/", (req, res) => {
 let notes = [
     { title: "Sample Note", subject: "DSA", content: "Sample content", faculty: "Prof X" }
 ];
-
-// 🟢 GET ALL NOTES
-app.get("/notes", (req, res) => {
-    res.json(notes);
-});
-
-// 🟠 ADD NEW NOTE
-app.post("/notes", (req, res) => {
-    const { title, subject, content, faculty } = req.body;
-
-    if (!title || !subject || !content || !faculty) {
-        return res.json({ success: false, message: "All fields required" });
-    }
-
-    notes.push({ title, subject, content, faculty });
-    res.json({ success: true, message: "Note added!" });
-});
