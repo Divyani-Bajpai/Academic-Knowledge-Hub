@@ -2,7 +2,7 @@ const express = require("express");
 const { spawn } = require("child_process");
 const path = require("path");
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 const cors = require("cors");
 
 // ✅ Allow all origins (frontend can access backend)
@@ -75,7 +75,9 @@ app.post("/login", (req, res) => {
       .json({ success: false, message: "Missing username or password." });
   }
 
-  const child = spawn(".\\auth_api.exe", ["login"]);
+  const exePath = path.join(__dirname, 'auth_api.exe');
+const child = spawn(exePath, ["login"]);
+
 
   const line = `${username}|${password}\n`;
   child.stdin.write(line);
@@ -955,29 +957,7 @@ app.get("/api/syllabus/:subject", (req, res) => {
 app.listen(PORT, () => {
   console.log(`API server running at http://localhost:${PORT}`);
 });
-app.get("/", (req, res) => {
-    res.send("Backend running!");});
-    // 🟣 NOTES TEMP STORAGE
-let notes = [
-    { title: "Sample Note", subject: "DSA", content: "Sample content", faculty: "Prof X" }
-];
 
-// 🟢 GET ALL NOTES
-app.get("/notes", (req, res) => {
-    res.json(notes);
-});
-
-// 🟠 ADD NEW NOTE
-app.post("/notes", (req, res) => {
-    const { title, subject, content, faculty } = req.body;
-
-    if (!title || !subject || !content || !faculty) {
-        return res.json({ success: false, message: "All fields required" });
-    }
-
-    notes.push({ title, subject, content, faculty });
-    res.json({ success: true, message: "Note added!" });
-});
 
 
 
