@@ -99,7 +99,6 @@
             justify-content: center;
         }
 
-        /* NEW: Form Box Container */
         .form-box {
             background: white;
             border: 2px solid #e0e0e0;
@@ -320,7 +319,6 @@
                                 <option value="">Select Role</option>
                                 <option value="student">Student</option>
                                 <option value="faculty">Faculty</option>
-                                <option value="admin">Administrator</option>
                             </select>
                         </div>
                         <button type="submit" class="btn-primary">Create Account</button>
@@ -351,7 +349,7 @@
     </div>
 
     <script>
-     const API_URL = 'http://localhost:3000';
+        const API_URL = 'http://localhost:3000';
 
         function switchTab(tab) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
@@ -386,22 +384,18 @@
                 });
                 const data = await response.json();
                 if (data.success) {
-    const session = {
-        token: data.token,
-        username,
-        role: data.role,
-        userId: data.userId
-    };
+                    const session = {
+                        token: data.token,
+                        username,
+                        role: data.role,
+                        userId: data.userId
+                    };
 
-    // Save session for the whole website
-    localStorage.setItem('akhUser', JSON.stringify(session));
-
-    // Go to main dashboard page
-    window.location.href = 'hub.html';
-} else {
-    showAlert('✗ ' + data.message, 'error');
-}
-
+                    localStorage.setItem('akhUser', JSON.stringify(session));
+                    window.location.href = 'hub.html';
+                } else {
+                    showAlert('✗ ' + data.message, 'error');
+                }
             } catch {
                 showAlert('✗ Cannot connect to backend server.', 'error');
             }
@@ -440,7 +434,6 @@
             document.getElementById('dashUserId').textContent = session.userId;
             document.getElementById('dashToken').textContent = session.token;
             document.getElementById('dashAccessLevel').textContent =
-                session.role === 'admin' ? 'Full Access' :
                 session.role === 'faculty' ? 'Teacher Access' : 'Student Access';
         }
 
