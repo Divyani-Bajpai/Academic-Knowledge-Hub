@@ -616,16 +616,6 @@ app.get("/api/syllabus/:subject", (req, res) => {
   });
 });
 
-// Serve index.html as default
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
-// Fallback to serve any other HTML route
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
-
 app.listen(PORT, () => {
   console.log(`API server running at http://localhost:${PORT}`);
 });
